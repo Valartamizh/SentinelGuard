@@ -8,14 +8,14 @@
 ## Architecture Overview
 
 ```
-Windows Agent  →  Spring Boot Backend  →  PostgreSQL
-                          ↓
-                    AI Engine (future)
-                          ↓
-                  React Dashboard
+Windows Agent (Python + DPAPI)  ──[Heartbeat (30s) / Bearer Auth]──▶  Spring Boot 3 Backend  ──▶  PostgreSQL 16
+                                                                             │
+                                                                   [JWT Admin Auth]
+                                                                             ▼
+                                                                  React + Vite Dashboard
 ```
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full planned architecture.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation.
 
 ---
 
@@ -23,84 +23,107 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full planned architec
 
 ```
 SentinelGuard/
-├── agent/          # Python Windows endpoint monitoring agent
-├── backend/        # Java 21 Spring Boot 3 REST API
-├── ai-engine/      # Python FastAPI + scikit-learn AI engine
+├── agent/          # Python 3.12+ Windows endpoint monitoring agent (DPAPI protected)
+├── backend/        # Java 21 Spring Boot 3 REST API (Spring Security, Flyway, JPA)
+├── ai-engine/      # Python FastAPI + scikit-learn AI engine (Future phases)
 ├── dashboard/      # React + Vite + Tailwind CSS admin dashboard
-├── docs/           # Project documentation
+├── docs/           # Project architectural and operational documentation
+│   ├── ARCHITECTURE.md
+│   ├── SETUP.md
+│   ├── PHASE2_TESTING.md
+│   └── AGENT_ENROLLMENT.md
 ├── docker-compose.yml
+├── .env.example
 ├── .gitignore
 └── README.md
 ```
 
 ---
 
-## Quick Start (Phase 1)
+## Phase Status
 
-### Prerequisites
+| Phase | Description | Status |
+|-------|-------------|--------|
+| **Phase 1** | Project Foundation (PostgreSQL, Spring Boot skeleton, Health endpoint, React Shell) | ✅ Complete |
+| **Phase 2** | Secure Employee/Device Enrollment, Windows DPAPI Credential Store, Authenticated Heartbeats, Enterprise UI/UX v2.0 Redesign | ✅ Complete |
+| **Phase 3** | Real-Time Windows Endpoint Monitoring (Process, USB, Privacy Clipboard, Screen App Detection, Live SSE Dashboard) | ✅ Complete |
+| **Phase 4** | AI Behavioral Threat Detection & Risk Scoring | ⏳ Upcoming |
+| **Phase 5** | Incident Response, Alert Dashboard & Reporting | ⏳ Upcoming |
 
-| Tool | Version | Notes |
-|------|---------|-------|
-| Java | 21 | Eclipse Temurin recommended |
-| Maven | 3.9+ | Bundled with IntelliJ or standalone |
-| Node.js | 18+ | For the dashboard |
-| Docker Desktop | Latest | For PostgreSQL |
+---
+
+## Quick Start (Phase 2)
 
 ### 1. Start PostgreSQL (Docker)
 
-```bash
-# From project root
+```powershell
+# From project root:
+.\start-postgres.ps1
+# Or directly:
 docker compose up -d postgres
 ```
 
-### 2. Start the Backend
+### 2. Start Backend (Spring Boot 3)
 
-```bash
+```powershell
 cd backend
-# Copy the environment template and fill in your values
-copy .env.example .env
-
-# Build and run
-mvnw.cmd spring-boot:run
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.7.6-hotspot"
+$env:DB_PASSWORD = "SentinelGuard_Dev_2024!"
+$env:JWT_SECRET = "U2VudGluZWxHdWFyZC1KV1QtU2VjcmV0LURldi0yMDI0LU11c3RDaGFuZ2VJblByb2R1Y3Rpb24hISE="
+$env:ADMIN_USERNAME = "admin"
+$env:ADMIN_PASSWORD = "SentinelAdmin2024!"
+.\mvnw.cmd spring-boot:run
 ```
+- Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- Health check: [http://localhost:8080/api/v1/health](http://localhost:8080/api/v1/health)
 
-Backend runs at: http://localhost:8080  
-Swagger UI: http://localhost:8080/swagger-ui.html
+### 3. Start Frontend Dashboard
 
-### 3. Start the Dashboard
-
-```bash
+```powershell
 cd dashboard
 npm install
 npm run dev
 ```
+- Dashboard Console: [http://localhost:5173](http://localhost:5173)
+- Default Admin Credentials: `admin` / `SentinelAdmin2024!`
 
-Dashboard runs at: http://localhost:5173
+### 4. Enroll & Run Windows Agent
+
+```powershell
+cd agent
+python -m pip install -r requirements.txt
+
+# 1. Check status
+python -m src.main status
+
+# 2. Enroll using token generated in the Admin Dashboard
+python -m src.main enroll --token <one-time-token>
+
+# 3. Start heartbeat service (sends heartbeats every 30s)
+python -m src.main start
+```
 
 ---
 
-## Development Phases
+## Automated Verification Tests
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| 1 | ✅ **Current** | Project foundation, health endpoint, DB setup, dashboard skeleton |
-| 2 | 🔲 Planned | Windows agent data collection |
-| 3 | 🔲 Planned | Backend event ingestion API |
-| 4 | 🔲 Planned | AI behavioral analysis engine |
-| 5 | 🔲 Planned | Full dashboard with alerts & risk scores |
+- **Backend Integration Tests**:
+  ```powershell
+  cd backend
+  .\mvnw.cmd test
+  ```
+- **Agent Unit Tests**:
+  ```powershell
+  cd agent
+  python -m unittest discover -s tests
+  ```
+- **Phase 2 Full End-to-End Test**:
+  ```powershell
+  python test_e2e_phase2.py
+  ```
+- **Phase 3 Real-Time Telemetry End-to-End Test**:
+  ```powershell
+  python test_e2e_phase3.py
+  ```
 
----
-
-## Health Check
-
-```bash
-curl http://localhost:8080/api/v1/health
-```
-
-Expected response:
-```json
-{
-  "status": "UP",
-  "service": "SentinelGuard Backend"
-}
-```
+See [docs/PHASE3_MONITORING.md](docs/PHASE3_MONITORING.md) for detailed Phase 3 telemetry architecture, APIs, and privacy specifications.

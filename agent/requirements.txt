@@ -1,0 +1,11 @@
+# SentinelGuard Windows Agent — Dependencies
+# Phase 2: Enrollment and Heartbeat telemetry
+
+# HTTP client for backend REST API communication
+requests>=2.31.0
+
+# System and hardware metrics
+psutil>=5.9.8
+
+# Environment variables
+python-dotenv>=1.0.0

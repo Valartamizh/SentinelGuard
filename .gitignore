@@ -1,0 +1,61 @@
+# ============================================================
+# SentinelGuard — Root .gitignore
+# ============================================================
+
+# ── Environment & Secrets ───────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
+
+# ── OS ──────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDEs ────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+nbproject/
+
+# ── Java / Maven ────────────────────────────────────────────
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# ── Node / React ────────────────────────────────────────────
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.vite/
+
+# ── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# ── Docker ──────────────────────────────────────────────────
+# Do not ignore docker-compose.yml — it is part of the project
+
+# ── Logs ────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Compiled assets ─────────────────────────────────────────
+*.class

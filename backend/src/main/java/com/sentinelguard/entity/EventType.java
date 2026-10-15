@@ -1,0 +1,11 @@
+package com.sentinelguard.entity;
+
+public enum EventType {
+    PROCESS_STARTED,
+    PROCESS_STOPPED,
+    USB_CONNECTED,
+    USB_DISCONNECTED,
+    CLIPBOARD_CHANGED,
+    APPLICATION_DETECTED,
+    APPLICATION_EXITED
+}

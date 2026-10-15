@@ -1,0 +1,39 @@
+# SentinelGuard — Docker Compose
+# Phase 1: PostgreSQL only
+#
+# Usage:
+#   docker compose up -d postgres      (start DB only)
+#   docker compose up -d               (start all services)
+#   docker compose down                (stop all)
+#   docker compose down -v             (stop and remove volumes)
+
+services:
+
+  # ─── PostgreSQL ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinelguard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sentinelguard
+      POSTGRES_USER: sentinelguard
+      # Password is read from the .env file at project root.
+      # Copy .env.example → .env and set POSTGRES_PASSWORD before running.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinelguard -d sentinelguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Future services (Phase 2+) ─────────────────────────────────────────────
+  # backend:   (Spring Boot — run locally with Maven for now)
+  # ai-engine: (Python FastAPI — NOT IMPLEMENTED YET)
+
+volumes:
+  postgres_data:
+    driver: local

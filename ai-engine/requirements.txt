@@ -1,0 +1,24 @@
+# SentinelGuard AI Engine — Dependencies
+# Phase 4+ (NOT IMPLEMENTED YET)
+#
+# Install with: pip install -r requirements.txt
+
+# REST API framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# Machine learning
+scikit-learn==1.5.2
+numpy==2.1.1
+pandas==2.2.3
+
+# Database access
+sqlalchemy==2.0.35
+psycopg2-binary==2.9.9
+
+# Background tasks
+celery==5.4.0
+redis==5.1.0
+
+# Structured logging
+structlog==24.4.0

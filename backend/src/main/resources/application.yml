@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: SentinelGuard Backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sentinelguard
+    username: sentinelguard
+    password: ${DB_PASSWORD:SentinelGuard_Dev_2024!}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 20000
+      maximum-pool-size: 10
+      pool-name: SentinelGuardPool
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+  # Disable Spring Security's default form login — we use JWT
+  security:
+    user:
+      name: ignored   # Overridden by SecurityConfig
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+# ── Application-specific settings ─────────────────────────────
+app:
+  jwt:
+    # Must be a Base64-encoded string of at least 32 bytes (256 bits).
+    # Set JWT_SECRET environment variable — never use the example value in production.
+    secret: ${JWT_SECRET:U2VudGluZWxHdWFyZC1KV1QtU2VjcmV0LURldi0yMDI0LU11c3RDaGFuZ2VJblByb2R1Y3Rpb24hISE=}
+    expiration-ms: 3600000   # 1 hour
+
+  admin:
+    # Used ONCE on first startup to bootstrap the initial admin account.
+    # The account is stored in admin_users with a BCrypt hash.
+    # These values are ignored after the first admin record exists.
+    bootstrap-username: ${ADMIN_USERNAME:admin}
+    bootstrap-password: ${ADMIN_PASSWORD:SentinelAdmin2024!}
+
+  enrollment:
+    token-expiry-minutes: 15   # One-time tokens expire after 15 minutes
+
+  heartbeat:
+    online-threshold-seconds: 90   # Device is ONLINE if last_seen < 90s ago
+
+logging:
+  level:
+    root: INFO
+    com.sentinelguard: DEBUG
+    org.flywaydb: INFO
+    org.springframework.security: WARN
